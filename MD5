@@ -1,0 +1,11 @@
+632759dc56185ef41569cfedc2d6aa8c *DESCRIPTION
+e9fb1252b4189c3c172099e473290082 *LICENSE
+777d5f0c9b860b0c6adedcd9def868cd *NAMESPACE
+6afe6bee7c917926a3ee3814c120555e *R/Grid2Polygons.R
+1e7aa2f6be4fc645da7df674004a8ecb *README.md
+a3c041261c50b5c2cd75d417a0d1522f *data/DEM.rda
+a2cae935bce54c3069bb238ccd63f48f *data/datalist
+6773c6971cdc77059b76e65d39e31448 *inst/doc/Concept_Diagram.pdf
+534105d1a22f99e9a13ad894302dd835 *man/DEM.Rd
+421c9f191bb64a055ddb94f24a91d95f *man/Grid2Polygons.Rd
+5369b81b84b964cbca5c4ca2b2333066 *src/Grid2Polygons.c

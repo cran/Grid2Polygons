@@ -1,0 +1,8 @@
+useDynLib(Grid2Polygons)
+
+importFrom(sp, Polygon, Polygons, SpatialPolygons, CRS)
+
+importClassesFrom(sp, SpatialGridDataFrame, SpatialPolygonsDataFrame,
+                  SpatialPolygons, CRS)
+
+export(Grid2Polygons)
