@@ -1,13 +1,16 @@
 Grid2Polygons <- function (grd, zcol=1, level=FALSE, at, cuts=20,
-                           pretty=FALSE) {
+                           pretty=FALSE, xlim=NULL, ylim=NULL, ply=NULL) {
 
   # Additional functions (subroutines)
 
-  # Find polygon nodes
+  # Find polygon nodes:
   #  Input:  s          - matrix; 2-column table giving start- and end-node
   #                       indexes for each segment in a level
   #  Output: poly.nodes - list; vector components giving node indexes for each
-  #                       polygon ring. Winding rule applies.
+  #                       polygon ring. The status of the polygon as a hole or
+  #                       an island is taken from the ring direction, with
+  #                       clockwise meaning island, and counter-clockwise
+  #                       meaning hole.
   FindPolyNodes <- function (s) {
 
     # Remove duplicate segments
@@ -24,6 +27,8 @@ Grid2Polygons <- function (grd, zcol=1, level=FALSE, at, cuts=20,
 
     # Place returned array into list object
     poly.nodes <- lapply(unique(out[, 2]), function(i) out[out[, 2] == i, 1])
+
+    # Close polygon by joining the first point to the last point
     poly.nodes <- lapply(poly.nodes, function(i) c(i, i[1]))
 
     poly.nodes
@@ -41,6 +46,24 @@ Grid2Polygons <- function (grd, zcol=1, level=FALSE, at, cuts=20,
     stop("Column name not in attribute table")
   if (is.numeric(zcol) && zcol > ncol(slot(grd, "data")))
     stop("Column number outside bounds of attribute table")
+  if (!is.null(ply) && !inherits(ply, c("SpatialPolygons", 
+                                        "SpatialPolygonsDataFrame", 
+                                        "gpc.poly")))
+    stop("Polygon class is incorrect")
+
+  # Crop grid data using limit arguments
+  if (!is.null(xlim) | !is.null(ylim)) {
+    if (is.null(xlim))
+      xlim <- bbox(grd)[1, ]
+    if (is.null(ylim))
+      ylim <- bbox(grd)[2, ]
+    vertices <- matrix(c(xlim[1], xlim[2], xlim[2], xlim[1], xlim[1],
+                         ylim[1], ylim[1], ylim[2], ylim[2], ylim[1]),
+                         nrow=5, ncol=2)
+    ply.box <- SpatialPolygons(list(Polygons(list(Polygon(vertices, hole=FALSE)), 1)))
+    proj4string(ply.box) <- CRS(proj4string(grd))
+    grd[[zcol]] <- grd[[zcol]] * sp::overlay(grd, ply.box)
+  }
 
   # Determine break points
   if (level) {
@@ -91,18 +114,19 @@ Grid2Polygons <- function (grd, zcol=1, level=FALSE, at, cuts=20,
   segs <- na.omit(segs)
 
   # Identify levels (or unique values)
-  levs <- unique(na.omit(z))
+  levs <- sort(unique(na.omit(z)))
 
   # Find polygon nodes for each level
   fun <- function(i) FindPolyNodes(segs[segs[, "z"] == i, c("a", "b")])
-  poly.nodes <- sapply(levs, fun)
+  poly.nodes <- lapply(levs, fun)
 
   # Build lists of Polygon objects
   fun <- function(i) lapply(i, function(j) Polygon(coords[j, ]))
   poly <- lapply(poly.nodes, fun)
 
   # Build list of Polygons objects
-  fun <- function(i) Polygons(poly[[i]], ID=format(levs[i]))
+  ids <- make.names(1:length(poly), unique=TRUE)
+  fun <- function(i) Polygons(poly[[i]], ID=ids[i])
   polys <- lapply(1:length(poly), fun)
 
   # Convert to SpatialPolygons object, add datum and projection
@@ -111,6 +135,32 @@ Grid2Polygons <- function (grd, zcol=1, level=FALSE, at, cuts=20,
   # Convert to SpatialPolygonsDataFrame object, add data frame of levels
   d <- data.frame(z=levs, row.names=row.names(sp.polys))
   sp.polys.df <- SpatialPolygonsDataFrame(sp.polys, data=d, match.ID=TRUE)
+  
+  # Crop SpatialPolygonsDataFrame object using polygon argument
+  if (!is.null(ply)) {
+    if (!inherits(ply, "gpc.poly"))
+      ply <- as(ply, "gpc.poly")
+    is.included <- c()
+    ids <- row.names(sp.polys.df)
+    p1 <- as(sp.polys.df, "gpc.poly")
+    p2 <- list()
+    for (i in seq(along=p1)) {
+      p <- rgeos::intersect(p1[[i]], ply)
+      is.included[i] <- length(p@pts) > 0
+      if (is.included[i]) {
+        s.plys <- as(p, "SpatialPolygons")
+        l.plys <- lapply(slot(s.plys, "polygons"), 
+                         function(j) {slot(j, "ID") <- ids[i]; j})
+        p2 <- c(p2, l.plys)
+      }
+    }
+    if (length(p2) > 0) {
+      p2 <- SpatialPolygons(p2, proj4string=CRS(proj4string(grd)))
+      d <- data.frame(z=sp.polys.df[[zcol]][is.included], 
+                      row.names=ids[is.included])
+      sp.polys.df <- SpatialPolygonsDataFrame(p2, data=d)
+    }
+  }
 
   sp.polys.df
 }

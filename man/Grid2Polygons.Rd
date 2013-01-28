@@ -13,7 +13,8 @@ reduced in size and result in a much "cleaner" version of your image.
 }
 
 \usage{
-Grid2Polygons(grd, zcol = 1, level = FALSE, at, cuts = 20, pretty = FALSE)
+Grid2Polygons(grd, zcol = 1, level = FALSE, at, cuts = 20, pretty = FALSE,
+              xlim = NULL, ylim = NULL, ply = NULL)
 }
 
 \arguments{
@@ -27,6 +28,12 @@ Grid2Polygons(grd, zcol = 1, level = FALSE, at, cuts = 20, pretty = FALSE)
 \item{cuts}{integer; number of levels the range of \code{z} would be
   divided into.}
 \item{pretty}{logical; whether to use pretty cut locations.}
+\item{xlim}{numeric; vector of length 2 giving left and right limits of the 
+  spatial grid, data outside these limits is excluded.}
+\item{ylim}{numeric; vector of length 2 giving lower and upper limits of 
+  the spatial grid, data outside these limits is excluded.}
+\item{ply}{gpc.poly, SpatialPolygons, or SpatialGridDataFrame; 
+  cropping polygon.}
 }
 
 \value{
@@ -34,8 +41,9 @@ Returns an object of class \code{SpatialPolygonsDataFrame}. The objects
 \code{data} slot is a data frame, number of rows equal to the number of
 \code{Polygons} objects and a single column containing values of \code{z}.
 If \code{level} is \code{TRUE}, \code{z} values are set equal to the midpoint
-between breakpoints. A "winding rule" is used to determine if a polygon ring
-is filled (island) or is a hole in another polygon.
+between breakpoints. The status of the polygon as a hole or an island is
+taken from the ring direction, with clockwise meaning island, and
+counter-clockwise meaning hole.
 }
 
 \note{
@@ -63,7 +71,8 @@ inspiration provided
 }
 
 \examples{
-# Example 1:
+# Example 1
+
 m <- 5
 n <- 6
 z <- c(1.1,  1.5,  4.2,  4.1,  4.3,  4.7,
@@ -79,59 +88,76 @@ grd <- data.frame(z = z, xc = xc, yc = yc)
 coordinates(grd) <- ~ xc + yc
 gridded(grd) <- TRUE
 grd <- as(grd, "SpatialGridDataFrame")
-summary(grd)
 image(grd, col = gray.colors(30), axes = TRUE)
 grid(col = "black", lty = 1)
 points(x = x, y = y, pch = 16)
 text(cbind(xc, yc), labels = z)
-text(cbind(x = x + 0.1, y = rev(y + 0.1)), labels = 1:42, cex=0.6)
-plys <- Grid2Polygons(grd, level = TRUE, at = 1:5)
-summary(plys)
-cols <- rainbow(4, alpha = 0.3)
-plot(plys, col = cols, add = TRUE)
-x <- rep(0:6, m + 1)
-y <- rep(0:5, each = n + 1)
-legend("top", legend = plys[[1]], fill = cols, bty = "n",
-       xpd = TRUE, inset = c(0, -0.1), ncol = 4)
+text(cbind(x = x + 0.1, y = rev(y + 0.1)), labels = 1:42, cex = 0.6)
 
-# Example 2:
+plys <- Grid2Polygons(grd, level = TRUE, at = 1:5)
+cols <- rainbow(length(plys), alpha = 0.3)
+plot(plys, add = TRUE, col = cols)
+legend("top", legend = plys[[1]], fill = cols, bty = "n", xpd = TRUE, 
+       inset = c(0, -0.1), ncol = length(plys))
+
+v <- matrix(c(2.5, 3.4, 3.7, 2.5, 2.5, 1.8, 3.1, 2.5), nrow = 4, ncol = 2)
+ply.0 <- Polygon(v, hole = TRUE)
+v <- matrix(c(1.2, 5.8, 2.5, 1.2, 0.5, 1.7, 5.1, 0.5), nrow = 4, ncol = 2)
+ply.1 <- Polygon(v, hole = FALSE)
+v <- matrix(c(-0.3, 1.7, -1.0, -0.3, 3.3, 5.1, 7.0, 3.3), nrow = 4, ncol = 2)
+ply.2 <- Polygon(v, hole = FALSE)
+ply <- SpatialPolygons(list(Polygons(list(ply.0, ply.1, ply.2), 1)))
+plys <- Grid2Polygons(grd, level = TRUE, at = 1:5, ply = ply)
+cols <- colorRampPalette(c("red", "gold", "green"))(length(plys))
+plot(plys, add = TRUE, col = cols)
+legend(xy.coords(1.9, -0.9), legend = plys[[1]], fill = cols, bty = "n", 
+       xpd = TRUE, inset = c(0, -0.1), ncol = length(plys))
+
+# Example 2
+
 data(meuse.grid)
 coordinates(meuse.grid) <- ~ x + y
 gridded(meuse.grid) <- TRUE
 meuse.grid <- as(meuse.grid, "SpatialGridDataFrame")
 meuse.plys <- Grid2Polygons(meuse.grid, "dist", level = FALSE)
 op <- par(mfrow = c(1, 2), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0))
-z <- meuse.plys[[1]]
-col.idxs <- findInterval(z, sort(unique(na.omit(z))))
-cols <- heat.colors(max(col.idxs))[col.idxs]
-plot(meuse.plys, col = cols)
+plot(meuse.plys, col = heat.colors(length(meuse.plys)))
 title("level = FALSE", line = -7)
+
 meuse.plys.lev <- Grid2Polygons(meuse.grid, "dist", level = TRUE)
-z <- meuse.plys.lev[[1]]
-col.idxs <- findInterval(z, sort(unique(na.omit(z))))
-cols <- heat.colors(max(col.idxs))[col.idxs]
-plot(meuse.plys.lev, col = cols)
+plot(meuse.plys.lev, col = heat.colors(length(meuse.plys.lev)))
 title("level = TRUE", line = -7)
 par(op)
 
-# Example 3:
-library(rgdal)
+\dontrun{
+# Example 3
+
 data(DEM)
-summary(DEM)
 at <- seq(500, 4000, by = 250)
 op <- par(oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0))
-image(DEM, breaks = at, col = terrain.colors(length(at) - 1))
-system.time({
-  dem.plys <- Grid2Polygons(DEM, level = TRUE, at = at)
-})
-summary(dem.plys)
-z <- dem.plys[[1]]
-col.idxs <- findInterval(z, sort(unique(na.omit(z))))
-cols <- terrain.colors(max(col.idxs))[col.idxs]
+image(DEM, breaks = at, col = terrain.colors(length(at) - 1L))
+
+dem.plys <- Grid2Polygons(DEM, level = TRUE, at = at)
+cols <- terrain.colors(length(dem.plys))
 plot(dem.plys, border = "transparent", col = cols)
-dem.plys.ll <- rgdal::spTransform(dem.plys, CRS = CRS("+proj=longlat +datum=WGS84"))
-plot(dem.plys.ll, border = "transparent", col = cols)
-par(op)
+
+library(rgdal)
+dem.plys.trans <- rgdal::spTransform(dem.plys, CRS = CRS("+proj=eqc"))
+plot(dem.plys.trans, border = "transparent", col = cols)
+
+dem.plys.lims <- Grid2Polygons(DEM, level = TRUE,  pretty = TRUE,
+                               xlim = c(178000, 257500), 
+                               ylim = c(202000, 272000))
+plot(dem.plys.lims, border = "transparent", 
+     col = terrain.colors(length(dem.plys.lims)))
+
+v <- matrix(c(89500, 169000, 248500, 89500, 272075, 144825, 272075, 272075), 
+            nrow = 4, ncol = 2)
+ply <- SpatialPolygons(list(Polygons(list(Polygon(v, hole = FALSE)), 1)))
+dem.plys.crop <- Grid2Polygons(DEM, level = TRUE,  pretty = TRUE, ply = ply)
+plot(dem.plys.crop, border = "transparent", 
+     col = terrain.colors(length(dem.plys.crop)))
+par(op)}
 }
 
 \keyword{manip}

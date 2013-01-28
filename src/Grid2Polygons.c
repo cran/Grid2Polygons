@@ -1,13 +1,14 @@
 /*
  * Function: define_polygons
  * -------------------------
- * Defines polygon rings within single level
+ * Defines polygon rings within a single level
  *
- * a: integer; array of start-nodes for each segment in level
- * b: integer; array of end-nodes for each segment in level
- * m: integer; number of segments in level
+ * Arguments:
+ * a: integer; array of start-nodes for each segment
+ * b: integer; array of end-nodes for each segment
+ * m: integer; number of segments
  *
- * returns:
+ * Returns:
  * ans: integer; polygon rings defined by nodes and ring index
  */
 
@@ -31,7 +32,7 @@ void define_polygons(int *a, int *b, int *m, int *ans) {
     ans[i] = node;
     ans[nsegs + i] = ply;
 
-    a[idx] = -1;
+    a[idx] = -1; /* exclude used points */
     b[idx] = -1;
 
     idx = find_next_seg(a, nsegs, node);
@@ -48,18 +49,19 @@ void define_polygons(int *a, int *b, int *m, int *ans) {
 int find_next_seg(int array[], int nelements, int value) {
   int i;
   for (i = 0; i < nelements; i++) {
-    if (array[i] == value) {
+    if (array[i] == value) { /* end-node equals start-node */
       return(i);
     }
   }
   return(-1);
 }
 
-/* Find index for start of new polygon by finding first unused segment */
+/* Find index for start of new polygon by finding first */
+/* unused segment */
 int start_new_seg(int array[], int nelements) {
   int i;
   for (i = 0; i < nelements; i++) {
-    if (array[i] > 0) {
+    if (array[i] > 0) { /* first unused point */
       return(i);
     }
   }

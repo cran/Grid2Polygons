@@ -1,0 +1,4 @@
+%\VignetteIndexEntry{Concept diagram}
+\documentclass{article}
+\begin{document}
+\end{document}

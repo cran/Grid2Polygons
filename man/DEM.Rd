@@ -25,6 +25,13 @@ Albers Equal-Area Conic projection; standard parallels 42.83, 44.16;
 central meridian -113.00, false easting 200,000 meters; false northing 0.
 }
 
+
+\source{
+The National Elevation Dataset (\href{http://ned.usgs.gov/}{NED})
+1-arc-second raster. Dataset resampled to 10 arc-seconds using a
+cubic convolution assignment.
+}
+
 \examples{
 data(DEM)
 summary(DEM)
