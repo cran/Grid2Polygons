@@ -144,7 +144,7 @@ Grid2Polygons <- function (grd, zcol=1, level=FALSE, at, cuts=20,
     p1 <- as(sp.polys.df, "gpc.poly")
     p2 <- list()
     for (i in seq(along=p1)) {
-      p <- rgeos::intersect(p1[[i]], ply)
+      p <- intersect(p1[[i]], ply)
       is.included[i] <- length(p@pts) > 0
       if (is.included[i]) {
         s.plys <- as(p, "SpatialPolygons")
