@@ -1,7 +1,10 @@
-6ef35ed61759befc6ab4edd21b47e92f *DESCRIPTION
-6d4f6671628ac273ba1d98a5f9bb1a73 *NAMESPACE
-05d275dd0f12730aca556b3682e40218 *NEWS
-bd422cfa48247a68f964f8a3df33eda8 *R/Grid2Polygons.R
-6773c6971cdc77059b76e65d39e31448 *inst/doc/Concept_diagram.pdf
-e949e950b6bc08a8f0af73c0d1dfb590 *man/Grid2Polygons.Rd
+937ebe01acc5add8df092c9f6c076223 *DESCRIPTION
+bc1b5d3f489136ffe64fbd48513a7a4c *NAMESPACE
+deeb24575c0c38aedb5882fa1be07b36 *NEWS.md
+0c7311a31232fc3af731c902c4a9d208 *R/Grid2Polygons.R
+28025b6ff162094056f98a4b74ce2b65 *R/zzz.R
+5f224ba83eace2f03f409d99f11636d1 *README.md
+1bf06fcba46a0caa478f62a03595c554 *inst/CITATION
+d7984ef94dfc4ce35ad21f5c73169a02 *inst/misc/Concept_diagram.pdf
+5f671a7b46f11ce8f7cf005c45056a4c *man/Grid2Polygons.Rd
 97f724457b7bd9ede3aa5f811ee713b5 *src/Grid2Polygons.c
