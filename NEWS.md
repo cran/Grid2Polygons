@@ -1,3 +1,7 @@
+# Grid2Polygons 0.2.1
+
+- The functionality of this package has been deprecated; please use `inlmisc::Grid2Polygons` instead.
+
 # Grid2Polygons 0.1.6
 
 - Replace custom code used for cropping the SpatialPolygonsDataFrame with `raster::crop` function.

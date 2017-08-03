@@ -1,32 +1,11 @@
 # Grid2Polygons
 
-[![Travis-CI Build Status](https://travis-ci.org/jfisher-usgs/Grid2Polygons.svg?branch=master)](https://travis-ci.org/jfisher-usgs/Grid2Polygons)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/Grid2Polygons)](https://CRAN.R-project.org/package=Grid2Polygons)
+[![](https://cranlogs.r-pkg.org/badges/Grid2Polygons?color=brightgreen)](https://CRAN.R-project.org/package=Grid2Polygons)
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 
-## Overview
-
-The [R](https://www.r-project.org/) package **Grid2Polygons** converts a spatial object from class SpatialGridDataFrame to SpatialPolygonsDataFrame.
-As an alternative, consider using the `rasterToPolygons` function in the
-**[raster](https://CRAN.R-project.org/package=raster)** package setting `dissolve = TRUE`.
-
-## Install
-
-You can install the stable version from [CRAN](https://CRAN.R-project.org/package=Grid2Polygons) using the following command:
-
-```r
-install.packages("Grid2Polygons")
-```
-
-Or use **devtools** to install the development version from GitHub.
-
-```r
-devtools::install_github("jfisher-usgs/Grid2Polygons")
-```
-
-## Bugs
-
-Please consider reporting bugs and asking questions on the [Issues page](https://github.com/jfisher-usgs/Grid2Polygons/issues).
+The `Grid2Polygons` function has been deprecated; please use `inlmisc::Grid2Polygons` instead,
+see **[inlmisc](https://CRAN.R-project.org/package=inlmisc)** package.
 
 ## License
 
